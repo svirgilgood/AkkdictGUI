@@ -1,2 +1,2 @@
 # AkkdictGUI
-Graphical Interface for @ninjaaron's akkdict command line tool. 
+Graphical Interface written with Tkinter for @ninjaaron's akkdict command line tool. 
