@@ -57,7 +57,7 @@ def main():
     B.grid(row=0, column=2, sticky=tk.W)
     top.grid_columnconfigure(1, weight=1)
 
-    top.pack(side=tk.BOTTOM)
+    top.pack(anchor=tk.CENTER)
 
     root.mainloop()
 
