@@ -7,6 +7,9 @@ AKKDIR = os.environ['HOME'] + '/.akkdict/'
 
 
 def akkdict_sh(top, entry):
+    '''
+    Runs akkdict with a terminal command
+    '''
     argu = entry.get()
     sp.Popen(["akkdict", argu])
     prv_argu(top, argu)
@@ -15,7 +18,7 @@ def akkdict_sh(top, entry):
 
 def submit_corr(argu, entry_prv):
     '''
-    The goal of this function is to write suggestion to file
+    This function writes updated PDF page numbers to file
     '''
     page_no = entry_prv.get()
     with open(AKKDIR + "cad_index_corr.txt", "a") as index_corr:
@@ -24,6 +27,10 @@ def submit_corr(argu, entry_prv):
 
 
 def prv_argu(top, argu):
+    '''
+    After the first entry is run, this function displays the option to suggest
+    updates for the CAD index.
+    '''
     instruc_txt = tk.StringVar()
     instruc_txt.set('''To help make Akkdict better, add the
     pdf page number in the empty blank, 
@@ -60,6 +67,7 @@ def main():
     top.pack(anchor=tk.CENTER)
 
     root.mainloop()
+
 
 if __name__ == '__main__':
     main()
