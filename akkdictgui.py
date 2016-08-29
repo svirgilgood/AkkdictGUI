@@ -1,7 +1,16 @@
-#!/usr/bin/env python2
-import Tkinter as tk
+#!/usr/bin/env python3
+import tkinter as tk
 import subprocess as sp 
 import os 
+import akkdict.akkdict as ak 
+import akkdict.fetchcad as akf 
+import configparser 
+import six
+import packaging
+import packaging.version
+import packaging.specifiers 
+import packaging.requirements 
+
 
 AKKDIR = os.environ['HOME'] + '/.akkdict/'
 
@@ -11,55 +20,64 @@ def akkdict_sh(top, entry):
     Runs akkdict with a terminal command
     '''
     argu = entry.get()
-    sp.Popen(["akkdict", argu])
-    prv_argu(top, argu)
+    cfg = configparser.ConfigParser()
+    home = os.environ['HOME']
+    if not cfg.read(home + '/.akkdictrc'):
+        cfg.read('conf.ini')
+    try:
+        ak.opendictionaries(argu, cfg['dicts'], cfg['conf']['command'])
+    except KeyError:
+        add_dict_path()
     entry.delete(0, tk.END)
 
 
-def submit_corr(argu, entry_prv):
-    '''
-    This function writes updated PDF page numbers to file
-    '''
-    page_no = entry_prv.get()
-    with open(AKKDIR + "cad_index_corr.txt", "a") as index_corr:
-            index_corr.write(argu + "," + page_no)
-    entry_prv.delete(0, tk.END)
+def add_dict_path():
+    top = tk.Toplevel()
+    top.title("Add Dictionary Path")
+    about_message = "type out the complete path name to the CAD path"
+    msg = tk.Message(top, text=about_message)
+    msg.pack()
+    path_entry = tk.StringVar(None)
+    path_entry = tk.Entry(top, textvariable=path_entry)
+    path_entry.bind('<Return>', lambda _: write_path(top, path_entry))
+    path_entry.pack()
+    sub_b = tk.Button(top, bd=1, text="SUBMIT", command=lambda: write_path(top, path_entry))
+    sub_b.pack()
+    add_cad = tk.Button(top, bd=1, text="Download CAD", command=download_cad)
+    add_cad.pack()
+    
+
+def write_path(top, path_entry):
+    doc = open('conf.ini', 'a')
+    argu = path_entry.get()
+    doc.write('[dicts]\nCAD = ' + argu)
+    top.destroy()
+    cfg.clear()
 
 
-def prv_argu(top, argu):
-    '''
-    After the first entry is run, this function displays the option to suggest
-    updates for the CAD index.
-    '''
-    instruc_txt = tk.StringVar()
-    instruc_txt.set('''To help make Akkdict better, add the
-    pdf page number in the empty blank, 
-    and submit it to our servers.''')
-    instruc_label = tk.Label(top, textvariable=instruc_txt, bd=0, font=("Helvetica", 10))
-    instruc_label.grid(row=4, column=0, columnspan=2, sticky='w')
-    label_text = tk.StringVar()
-    label_text.set(argu)
-    label_entry = tk.Label(top, textvariable=label_text, height=1, bd=0)
-    label_entry.grid(row=5, column=0, sticky='we')
-
-    entry_prv = tk.StringVar(None)
-    entry_prv = tk.Entry(top, textvariable=entry_prv , width=5)
-    entry_prv.grid(row=5, column=1, sticky='we')
-
-    b2 = tk.Button(top, bd=1, text="SUBMIT", command=lambda: submit_corr(argu, entry_prv))
-    b2.grid(row=5, column=2, sticky='we')
+def download_cad():
+    owd = os.getcwd()
+    home = os.environ['HOME']
+    os.mkdir(home + '/dicts')
+    os.chdir(home + '/dicts')
+    akf.download() 
+    os.chdir(owd)
+    doc = open('conf.ini', 'a')
+    doc.write('[dicts]\nCAD = ' + home +'/dicts/CAD/')
+    top.destroy()
 
 
 def main():
     root = tk.Tk()
     root.title("AkkdictGui")
-    logo = tk.PhotoImage(file=AKKDIR + "AkkdictLogo.gif")
+    logo = tk.PhotoImage(file="AkkdictLogo.gif")
     w1 = tk.Label(root, image=logo, bd=0).pack(side = tk.TOP)
 
     top = tk.Frame(root)
 
     entry = tk.Entry(top, bd=1)
     entry.grid(row=0, columnspan=2, sticky=tk.W)
+    entry.bind('<Return>', lambda _: akkdict_sh(top, entry))
     B = tk.Button(top, bd=1, text="SEARCH", command=lambda: akkdict_sh(top, entry)) 
     B.grid(row=0, column=2, sticky=tk.W)
     top.grid_columnconfigure(1, weight=1)
