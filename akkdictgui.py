@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import tkinter as tk
+import tkinter.filedialog as filedialog
 import subprocess as sp 
 import os 
 import akkdict.akkdict as ak 
@@ -37,14 +38,28 @@ def add_dict_path():
     about_message = "type out the complete path name to the CAD path"
     msg = tk.Message(top, text=about_message)
     msg.pack()
+    path_chooser = tk.Button(top, bd=1, text="Choose CAD Directory", command=lambda: filechoose(top) )
+    path_chooser.pack() 
+    '''
     path_entry = tk.StringVar(None)
     path_entry = tk.Entry(top, textvariable=path_entry)
     path_entry.bind('<Return>', lambda _: write_path(top, path_entry))
     path_entry.pack()
     sub_b = tk.Button(top, bd=1, text="SUBMIT", command=lambda: write_path(top, path_entry))
     sub_b.pack()
+    '''
+    msg2 = tk.Message(top, text='Or')
+    msg2.pack()
     add_cad = tk.Button(top, bd=1, text="Download CAD", command=download_cad)
     add_cad.pack()
+    
+
+def filechoose(window):
+    doc = open('conf.ini', 'a')
+    path = filedialog.askdirectory()
+    doc.write('[dicts]\nCAD = ' + path)
+    print(os.getcwd())
+    window.destroy()
     
 
 def write_path(top, path_entry):
