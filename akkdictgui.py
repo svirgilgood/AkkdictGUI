@@ -35,7 +35,7 @@ def akkdict_sh(top, entry):
 def add_dict_path():
     top = tk.Toplevel()
     top.title("Add Dictionary Path")
-    about_message = "type out the complete path name to the CAD path"
+    about_message = "Select the folder with the CAD files"
     msg = tk.Message(top, text=about_message)
     msg.pack()
     path_chooser = tk.Button(top, bd=1, text="Choose CAD Directory", command=lambda: filechoose(top) )
@@ -54,6 +54,10 @@ def filechoose(window):
     
 
 def download_cad():
+    import sys
+    downwin = tk.Toplevel()
+    T = tk.Text(downwin)
+    sys.stdout = tk.StdoutRedirector(T)
     owd = os.getcwd()
     home = os.environ['HOME']
     os.mkdir(home + '/dicts')
@@ -62,6 +66,7 @@ def download_cad():
     os.chdir(owd)
     doc = open('conf.ini', 'a')
     doc.write('[dicts]\nCAD = ' + home +'/dicts/CAD/')
+    downwin.destroy()
     top.destroy()
 
 
